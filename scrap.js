@@ -1,6 +1,8 @@
 // import puppeteer from "puppeteer";
 const fs = require("fs");
 const { default: puppeteer } = require("puppeteer");
+const checkEmailIsValid = require("./email");
+const websiteRequestCall = require("./axios");
 function extractEmails(text) {
   const a = text.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/gi);
   const result = [];
@@ -69,26 +71,36 @@ const startScrapping = async (url, outputFile) => {
   // - no default viewport (`defaultViewport: null` - website page will in full width and height)
 
   try {
-    const browser = await puppeteer.launch({
-      headless: false,
-      defaultViewport: null,
-    });
+    // const browser = await puppeteer.launch({
+    //   headless: false,
+    //   defaultViewport: null,
+    // });
 
-    // Open a new page
-    const page = await browser.newPage();
+    // // Open a new page
+    // const page = await browser.newPage();
 
-    // On this new page:
-    // - open the "http://quotes.toscrape.com/" website
-    // - wait until the dom content is loaded (HTML is ready)
-    await page.goto(url, {
-      waitUntil: "networkidle0",
-    });
-    var pageContent = await page.content();
+    // // On this new page:
+    // // - open the "http://quotes.toscrape.com/" website
+    // // - wait until the dom content is loaded (HTML is ready)
+    // await page.goto(url, {
+    //   waitUntil: "networkidle0",
+    // });
+    const a = await websiteRequestCall(url);
+    // var pageContent = await page.content();
     //   console.log(pageContent);
+    const pageContent = a;
     const result = { emails: [], mobiles: [], whatsapp: [] };
     const emails = extractEmails(pageContent);
     if (emails && Array.isArray(emails) && emails.length > 0) {
-      result.emails = [...new Set(emails)];
+      const x = [...new Set(emails)];
+      // if(checkEmailIsValid())
+      for (const iterator of x) {
+        try {
+          const res = await checkEmailIsValid(iterator);
+          // console.log("email", res, iterator);
+          if (res === "OK") result.emails.push(iterator);
+        } catch (e) {}
+      }
     }
     const mobiles = extractPhones(pageContent);
     //   console.log(mobiles);
@@ -101,16 +113,17 @@ const startScrapping = async (url, outputFile) => {
       result.whatsapp = waNumber;
     }
     // console.log(waNumber);
-    const title = await page.title();
-    browser.close();
+    // const title = await page.title();
+    // browser.close();
     const output = `${url},${result.emails.join(",")},${result.whatsapp.join(
       ","
     )},${result.mobiles.join(",")}\n`;
     //   console.log(output);
     const file = outputFile ? outputFile : "./output.txt";
     fs.writeFileSync(file, output, { flag: "a+" });
-    return title;
+    return url;
   } catch (e) {
+    console.log(e);
     return null;
   }
 };

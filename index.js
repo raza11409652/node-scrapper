@@ -16,9 +16,9 @@ async function application() {
   // const URL = data[0].URL;
   // const ab = await startScrapping(a, "./result.txt");
   // console.log(ab);
-  // const chunk2 = data.splice(0,10)
-  for (const iterator of data) {
-    const a = await startScrapping(iterator.URL, "./result1.txt");
+  const chunk2 = data.splice(2, 4);
+  for (const iterator of chunk2) {
+    const a = await startScrapping(iterator, "./result1.txt");
     // console.log(a);
     console.log(a);
   }
@@ -31,8 +31,7 @@ application();
  *  8
  *  7
  *  6
- *  - 
+ *  -
  *  -- api.whatsapp.com?phone =123455 [web.whatsapp.com] ->session -> [True|false]
  *  -- Name , Is business [true ,false]
  */
-

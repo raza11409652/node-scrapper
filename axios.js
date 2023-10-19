@@ -5,6 +5,6 @@ const websiteRequestCall = async (a) => {
   // a should also we a valid URL
   const { data } = await axios.get(a);
   //   console.log(data);
-  return typeof data === "string" ? data : undefined;
+  return typeof data === "string" ? data : "";
 };
 module.exports = websiteRequestCall;
